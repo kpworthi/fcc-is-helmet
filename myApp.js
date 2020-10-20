@@ -6,6 +6,8 @@
 var express = require('express'); // Do Not Edit
 var app = express();              // Do Not Edit
 
+const helmet = require("helmet");
+
 // ----
 
 /** - Challenges - *
@@ -17,6 +19,7 @@ var app = express();              // Do Not Edit
 // Express apps by setting various HTTP headers.
 // Install the package, then require it.
 
+//app.use(helmet());
 
 
 /** 2) Hide potentially dangerous information - `helmet.hidePoweredBy()` */
@@ -30,8 +33,19 @@ var app = express();              // Do Not Edit
 // people off. e.g. `helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' })`
 
 // Use `helmet.hidePoweredBy()``
+/*
+app.use(helmet.hidePoweredBy({}));
+app.use(helmet.frameguard({action: 'deny'}));
+app.use(helmet.xssFilter());
+app.use(helmet.noSniff());
+app.use(helmet.ieNoOpen());
 
-
+var ninetyDaysInSeconds = 90*24*60*60;
+app.use(helmet.hsts({maxAge: ninetyDaysInSeconds, force: true}))
+app.use(helmet.dnsPrefetchControl());
+app.use(helmet.noCache());
+app.use(helmet.contentSecurityPolicy({directives: {defaultSrc: ["'self'"], scriptSrc: ["'self'", "trusted-cdn.com"]}}))
+*/
 
 /** 3) Mitigate the risk of clickjacking - `helmet.frameguard()` */
 
@@ -113,7 +127,6 @@ var app = express();              // Do Not Edit
 // set the field `force` to `true` in the config object. To not alter hyperdev security 
 // policy we will intercept and restore the header, after inspecting it for testing.
 
-var ninetyDaysInSeconds = 90*24*60*60;
 
 
 //**Note**:
@@ -184,19 +197,17 @@ var ninetyDaysInSeconds = 90*24*60*60;
 // but these can be enabled if necessary. You can also disable or 
 // set any other middleware individually, using a configuration object.
 
-// // - Example - 
-// app.use(helmet({
-//   frameguard: {              // configure
-//     action: 'deny'
-//   },
-//   contentSecurityPolicy: {   // enable and configure
-//    directives: {
-//      defaultSrc: ["'self'"],
-//      styleSrc: ['style.com'],
-//    }
-//   },
-//  dnsPrefetchControl: false   // disable
-// }))
+app.use(helmet({
+  frameguard: false,
+  contentSecurityPolicy: {    // enable and configure
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      frameAncestors: ["'self'", "https://codepen.io/kpWorthi/pen/e4e7875550dc965dd0fbd64643743242", "https://cdpn.io/kpWorthi/debug/e4e7875550dc965dd0fbd64643743242"]
+    }
+  },
+  dnsPrefetchControl: false     // disable
+}))
 
 // We introduced each middleware separately, for teaching purpose, and for
 // ease of testing. Using the 'parent' `helmet()` middleware is easiest, and
